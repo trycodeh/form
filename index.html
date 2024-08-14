@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Form Creator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary-color: #6200ea;
+            --secondary-color: #b388ff;
+            --background-color: #f3e5f5;
+            --text-color: #37474f;
+            --success-color: #00c853;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(98, 0, 234, 0.1);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .question-container {
+            background-color: #e8eaf6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .question-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .answer-options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .answer-option {
+            flex: 1;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .answer-option:hover {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .answer-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background-color: #ff3d00;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #dd2c00;
+            transform: scale(1.05);
+        }
+
+        #submitBtn {
+            background-color: var(--success-color);
+            display: block;
+            margin: 30px auto 0;
+            width: 200px;
+        }
+
+        #submitBtn:hover {
+            background-color: #00e676;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .answer-options {
+                flex-direction: column;
+            }
+
+            .answer-option {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dynamic Form Creator</h1>
+        <div class="form-group">
+            <label for="formTitle">Form Title:</label>
+            <input type="text" id="formTitle" required>
+        </div>
+        <div class="form-group">
+            <label for="formDescription">Form Description:</label>
+            <textarea id="formDescription" rows="3"></textarea>
+        </div>
+        <div id="questionsContainer"></div>
+        <button onclick="addQuestion()">Add Question</button>
+        <button id="submitBtn" onclick="submitForm()">Submit Form</button>
+    </div>
+
+    <script>
+        let questionCount = 0;
+
+        function addQuestion() {
+            if (questionCount >= 5) {
+                alert("You can add a maximum of five questions.");
+                return;
+            }
+
+            questionCount++;
+            const questionsContainer = document.getElementById('questionsContainer');
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container';
+            questionDiv.style.opacity = '0';
+            questionDiv.style.transform = 'translateY(20px)';
+            questionDiv.innerHTML = `
+                <button class="delete-btn" onclick="deleteQuestion(this)">Delete</button>
+                <div class="form-group">
+                    <label for="question${questionCount}">Question ${questionCount}:</label>
+                    <input type="text" id="question${questionCount}" required>
+                </div>
+                <div class="form-group">
+                    <label for="answerType${questionCount}">Answer Type:</label>
+                    <select id="answerType${questionCount}" onchange="updateAnswerOptions(this)">
+                        <option value="star">Star Rating (1-5)</option>
+                        <option value="smiley">Smiley Rating</option>
+                        <option value="short">Short Answer</option>
+                    </select>
+                </div>
+                <div class="answer-options"></div>
+            `;
+            questionsContainer.appendChild(questionDiv);
+            updateAnswerOptions(questionDiv.querySelector('select'));
+
+            // Animate the new question
+            setTimeout(() => {
+                questionDiv.style.opacity = '1';
+                questionDiv.style.transform = 'translateY(0)';
+            }, 50);
+        }
+        function updateAnswerOptions(selectElement) {
+                const answerType = selectElement.value;
+                const questionDiv = selectElement.closest('.question-container');
+                const answerOptionsContainer = questionDiv.querySelector('.answer-options');
+                answerOptionsContainer.innerHTML = '';
+
+                if (answerType === 'star') {
+                    for (let i = 1; i <= 5; i++) {
+                        answerOptionsContainer.innerHTML += `<div class="answer-option" onclick="selectOption(this)">★${i}</div>`;
+                    }
+                } else if (answerType === 'smiley') {
+                    const smileys = ['😞', '😐', '😊', '😄', '😍'];
+                    smileys.forEach(smiley => {
+                        answerOptionsContainer.innerHTML += `<div class="answer-option" onclick="selectOption(this)">${smiley}</div>`;
+                    });
+                } else if (answerType === 'short') {
+                    answerOptionsContainer.innerHTML = '<input type="text" placeholder="Short answer">';
+                }
+            }
+              function selectOption(option) {
+                const options = option.parentElement.children;
+                for (let opt of options) {
+                    opt.classList.remove('selected');
+                }
+                option.classList.add('selected');
+            }
+            function deleteQuestion(deleteBtn) {
+                const questionDiv = deleteBtn.closest('.question-container');
+                questionDiv.remove();
+                questionCount--;
+                updateQuestionNumbers();
+            }
+              function updateQuestionNumbers() {
+                const questions = document.querySelectorAll('.question-container');
+                questions.forEach((question, index) => {
+                    const questionLabel = question.querySelector('label[for^="question"]');
+                    const questionInput = question.querySelector('input[id^="question"]');
+                    const answerTypeSelect = question.querySelector('select[id^="answerType"]');
+
+                    questionLabel.setAttribute('for', `question${index + 1}`);
+                    questionLabel.textContent = `Question ${index + 1}:`;
+                    questionInput.id = `question${index + 1}`;
+                    answerTypeSelect.id = `answerType${index + 1}`;
+                });
+            }
+        // ... (keep the previous JavaScript functions) ...
+
+        function submitForm() {
+            // Here you would typically send the form data to a server
+            // For this example, we'll just show an alert
+            alert("Form submitted successfully!");
+        }
+    </script>
+</body>
+</html>
